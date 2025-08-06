@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://www.localhost:3000'; // Replace with your backend URL
+const API_BASE_URL = 'https://festivize-backend.onrender.com'; // Replace with your backend URL
 
 const getAuthHeaders = () => {
   const token = localStorage.getItem('token');
