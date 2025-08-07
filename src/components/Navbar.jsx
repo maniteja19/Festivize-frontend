@@ -21,7 +21,7 @@ const Navbar = ({ setCurrentPage }) => {
       <div className="container mx-auto flex flex-col sm:flex-row justify-between items-center">
         <div className="text-2xl font-bold mb-2 sm:mb-0">
           <button onClick={() => setCurrentPage('home')} className="hover:text-blue-200 transition duration-200">
-            Expenditure Tracker
+            Festivize
           </button>
         </div>
         <div className="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-6">

@@ -28,7 +28,7 @@ const ExpendituresPage = () => {
 
   // Define expense categories as per requirements
   const expenseCategories = [
-    'Decoration', 'Lighting', 'Sound', 'Pooja items', 'Food', 'Other'
+    'Decoration', 'Lighting & Sound', 'Pooja items','Stage','panthulu', 'Food', 'Other'
   ];
 
   useEffect(() => {
