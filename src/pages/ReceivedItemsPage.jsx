@@ -207,7 +207,7 @@ const ReceivedItemsPage = () => {
               {items.map((item) => (
                 <tr key={item._id} className="border-b border-gray-200 last:border-b-0 hover:bg-gray-50">
                   <td className="py-3 px-4 text-gray-800">{item.itemName}</td>
-                  <td className="py-3 px-4 text-gray-800">{item.amount}</td>
+                  <td className="py-3 px-4 text-gray-800">₹{item.amount}</td>
                   <td className="py-3 px-4 text-gray-800">{item.denotedBy}</td>
                   <td className="py-3 px-4 text-gray-800">
                     <span className={`px-3 py-1 rounded-full text-xs font-semibold ${

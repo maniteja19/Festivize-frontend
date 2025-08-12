@@ -28,7 +28,7 @@ const ExpendituresPage = () => {
 
   // Define expense categories as per requirements
   const expenseCategories = [
-    'Decoration', 'Lighting & Sound', 'Pooja items','Stage','panthulu', 'Food', 'Other'
+    'Decoration', 'Lighting & Sound', 'Pooja items','Stage','Panthulu', 'Food', 'Other'
   ];
 
   useEffect(() => {
@@ -209,14 +209,14 @@ const ExpendituresPage = () => {
                 <tr key={exp._id} className="border-b border-gray-200 last:border-b-0 hover:bg-gray-50">
                   <td className="py-3 px-4 text-gray-800">{exp.itemName}</td>
                   <td className="py-3 px-4 text-gray-800">{exp.expenditureType}</td>
-                  <td className="py-3 px-4 text-gray-800">${exp.amountSpent.toFixed(2)}</td>
+                  <td className="py-3 px-4 text-gray-800">₹{exp.amountSpent.toFixed(2)}</td>
                   <td className="py-3 px-4 text-gray-800">{exp.paidBy}</td>
                   <td className="py-3 px-4 text-gray-800">{exp.remarks || 'N/A'}</td>
                   <td className="py-3 px-4 text-gray-800">{new Date(exp.createdAt).toLocaleDateString()}</td>
                   <td className="py-3 px-4 flex space-x-2">
                     <button
                       onClick={() => openEditModal(exp)}
-                      disabled={isCurrentYearClosed} // Disable if year is closed
+                      disabled={isCurrentYearClosed}
                       className={`p-1 rounded-md transition duration-200 ${
                         isCurrentYearClosed ? 'text-gray-400 cursor-not-allowed' : 'text-blue-600 hover:text-blue-800 hover:bg-blue-100'
                       }`}
@@ -224,7 +224,7 @@ const ExpendituresPage = () => {
                     >
                       <Edit size={18} />
                     </button>
-                    {isAdmin && ( // Only render delete button if isAdmin is true
+                    {isAdmin && (
                       <button
                         onClick={() => handleDelete(exp._id, exp.itemName)}
                         disabled={isCurrentYearClosed} // Disable if year is closed
