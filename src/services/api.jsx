@@ -137,3 +137,24 @@ export const getHomeMessage = async () => {
   });
   return handleResponse(response);
 };
+
+// Image Upload Endpoints
+export const uploadImage = async (file) => {
+  const formData = new FormData();
+  formData.append('file', file); // The field name 'photo' MUST match your multer.single('photo') in the backend route.
+
+  const response = await fetch(`${API_BASE_URL}/upload`, { // Assuming your route is '/upload'
+    method: 'POST',
+    headers: { ...getAuthHeaders() }, // Do NOT set 'Content-Type': 'multipart/form-data' explicitly; the browser does it automatically with FormData
+    body: formData,
+  });
+  return handleResponse(response);
+}; 
+
+// Fetch all images
+export const getAllImages = async () => {
+  const response = await fetch(`${API_BASE_URL}/images`, { // Assuming your route is /images
+    headers: getAuthHeaders(),
+  });
+  return handleResponse(response);
+};

@@ -1,20 +1,33 @@
-import React, { useState } from 'react';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { YearProvider } from './contexts/YearContext';
-import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
-import HomePage from './pages/Homepage';
-import ReceivedItemsPage from './pages/ReceivedItemsPage';
-import ExpendituresPage from './pages/ExpendituresPage';
-import YearManagementPage from './pages/YearManagementPage';
-import Navbar from './components/Navbar';
-import LoadingSpinner from './components/LoadingSpinner';
+// src/App.jsx
+import React, { useState, useEffect } from 'react';
+import { AuthProvider, useAuth } from './contexts/AuthContext.jsx';
+import { YearProvider } from './contexts/YearContext.jsx';
+import LoginPage from './pages/LoginPage.jsx';
+import RegisterPage from './pages/RegisterPage.jsx';
+import HomePage from './pages/HomePage.jsx';
+import ReceivedItemsPage from './pages/ReceivedItemsPage.jsx';
+import ExpendituresPage from './pages/ExpendituresPage.jsx';
+import YearManagementPage from './pages/YearManagementPage.jsx';
+import GalleryPage from './pages/GalleryPage.jsx';
+import Navbar from './components/Navbar.jsx';
+import LoadingSpinner from './components/LoadingSpinner.jsx';
 
 const AppContent = () => {
   const { isAuthenticated, loading: authLoading } = useAuth();
-  const [currentPage, setCurrentPage] = useState('login');
+  const [currentPage, setCurrentPage] = useState('gallery');
 
-  if (authLoading) { // Use authLoading here
+  useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search);
+    if (queryParams.get('token')) {
+      setCurrentPage('reset-password');
+    } else if (isAuthenticated) {
+      setCurrentPage('home');
+    } else {
+      setCurrentPage('gallery');
+    }
+  }, [isAuthenticated]);
+
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <LoadingSpinner />
@@ -22,42 +35,59 @@ const AppContent = () => {
     );
   }
 
-  // If not authenticated, show login/register pages
+  // Handle routing for all users
   if (!isAuthenticated) {
+    // Unauthenticated routes
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        {currentPage === 'login' && <LoginPage onSwitchToRegister={() => setCurrentPage('register')} />}
-        {currentPage === 'register' && <RegisterPage onSwitchToLogin={() => setCurrentPage('login')} />}
-        {/* Default to login if no specific page is set */}
-        {currentPage !== 'login' && currentPage !== 'register' && <LoginPage onSwitchToRegister={() => setCurrentPage('register')} />}
-      </div>
-    );
-  }
-
-  // If authenticated, show main app content wrapped with YearProvider
-  return (
-    <YearProvider> {/* NEW: Wrap authenticated content with YearProvider */}
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-100 flex flex-col">
+        <YearProvider>
         <Navbar setCurrentPage={setCurrentPage} />
-        <main className="container mx-auto p-4 sm:p-6 lg:p-8">
+        <main className="container mx-auto p-4 sm:p-6 lg:p-8 flex-grow flex items-center justify-center">
           {(() => {
             switch (currentPage) {
-              case 'home':
-                return <HomePage />;
-              case 'received-items':
-                return <ReceivedItemsPage />;
-              case 'expenditures':
-                return <ExpendituresPage />;
-              case 'manage-years': // NEW: Route for YearManagementPage
-                return <YearManagementPage />;
+              case 'login':
+                return <LoginPage onSwitchToRegister={() => setCurrentPage('register')} onSwitchToForgotPassword={() => setCurrentPage('forgot-password')} />;
+              case 'register':
+                return <RegisterPage onSwitchToLogin={() => setCurrentPage('login')} />;
+              case 'gallery':
+                return <GalleryPage />;
               default:
-                return <HomePage />; // Default authenticated page
+                return <GalleryPage />;
+
             }
           })()}
         </main>
+        </YearProvider>
       </div>
-    </YearProvider>
-  );
+    );
+  } else {
+    // Authenticated routes
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col">
+        <YearProvider>
+          <Navbar setCurrentPage={setCurrentPage} />
+          <main className="container mx-auto p-4 sm:p-6 lg:p-8 flex-grow">
+            {(() => {
+              switch (currentPage) {
+                case 'home':
+                  return <HomePage />;
+                case 'received-items':
+                  return <ReceivedItemsPage />;
+                case 'expenditures':
+                  return <ExpendituresPage />;
+                case 'manage-years':
+                  return <YearManagementPage />;
+                case 'gallery':
+                  return <GalleryPage />;
+                default:
+                  return <HomePage />;
+              }
+            })()}
+          </main>
+        </YearProvider>
+      </div>
+    );
+  }
 };
 
 function App() {

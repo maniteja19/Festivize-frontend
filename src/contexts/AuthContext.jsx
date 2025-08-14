@@ -1,44 +1,64 @@
 // src/contexts/AuthContext.jsx
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { login as apiLogin, register as apiRegister } from '../services/api';
-import { jwtDecode } from 'jwt-decode'; // Import jwt-decode
+import { jwtDecode } from 'jwt-decode';
 
-// Create the Auth Context
 const AuthContext = createContext(null);
 
-// Auth Provider Component
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem('token'));
-  const [loading, setLoading] = useState(true); // To manage initial loading state
+  const [loading, setLoading] = useState(true);
+
+  // Function to check if a token is expired
+  const isTokenExpired = (token) => {
+    if (!token) return true;
+    try {
+      const decoded = jwtDecode(token);
+      const currentTime = Date.now() / 1000;
+      return decoded.exp < currentTime;
+    } catch (error) {
+      // If decoding fails, the token is invalid
+      console.error("Invalid token:", error);
+      return true;
+    }
+  };
 
   useEffect(() => {
-    const initializeAuth = async () => {
-      if (token) {
+    const initializeAuth = () => {
+      setLoading(true);
+      if (token && !isTokenExpired(token)) {
         try {
           const decodedToken = jwtDecode(token);
-          // Check if token is expired (optional, but good practice)
-          if (decodedToken.exp * 1000 < Date.now()) {
-            console.warn("Token expired. Logging out.");
-            logout(); // Log out if token is expired
-          } else {
-            setUser({
-              isAuthenticated: true,
-              email: decodedToken.email,
-              role: decodedToken.role, // Extract role from decoded token
-              userId: decodedToken.userId,
-            });
-          }
+          setUser({
+            isAuthenticated: true,
+            email: decodedToken.email,
+            role: decodedToken.role,
+            userId: decodedToken.userId,
+          });
         } catch (error) {
           console.error("Error decoding token:", error);
-          logout(); // Clear invalid token
+          logout();
         }
+      } else {
+        // Log out if there is a token but it's invalid or expired
+        logout();
       }
       setLoading(false);
     };
 
     initializeAuth();
-  }, [token]); // Depend on token to re-run if token changes
+    
+    // Set up an interval to periodically check for token expiration
+    const checkInterval = setInterval(() => {
+        if (isTokenExpired(token)) {
+            console.warn("Token has expired. Logging out automatically.");
+            logout();
+        }
+    }, 60000); // Check every minute
+
+    return () => clearInterval(checkInterval); // Clean up the interval on unmount
+  }, [token]);
 
   const login = async (email, password) => {
     try {
@@ -46,7 +66,7 @@ export const AuthProvider = ({ children }) => {
       const response = await apiLogin(email, password);
       if (response.accessToken) {
         localStorage.setItem('token', response.accessToken);
-        setToken(response.accessToken); // This will trigger the useEffect above to decode and set user
+        setToken(response.accessToken);
         return { success: true, message: response.message };
       } else {
         return { success: false, message: response.message || 'Login failed' };
@@ -85,10 +105,10 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    isAuthenticated: !!user && !!token, // Convenience flag
-    isAdmin: user?.role === 'admin', // NEW: Expose isAdmin flag
+    isAuthenticated: !!user && !!token && !isTokenExpired(token),
+    isAdmin: user?.role === 'admin',
   };
-
+  console.log("AuthContext value:", value); // Debugging line to check context value
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
